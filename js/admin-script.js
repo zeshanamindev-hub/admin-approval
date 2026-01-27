@@ -2,7 +2,7 @@
  * Modern Admin JavaScript for Approval Plugin
  */
 
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
 
     // ========================================
     // Modal Functionality
@@ -12,19 +12,19 @@ jQuery(document).ready(function($) {
     var closeBtn = $('.approval-close');
 
     // Close modal when clicking the X
-    closeBtn.on('click', function() {
+    closeBtn.on('click', function () {
         modal.fadeOut(300);
     });
 
     // Close modal when clicking outside of it
-    $(window).on('click', function(event) {
+    $(window).on('click', function (event) {
         if (event.target == modal[0]) {
             modal.fadeOut(300);
         }
     });
 
     // Close modal on ESC key
-    $(document).on('keydown', function(e) {
+    $(document).on('keydown', function (e) {
         if (e.keyCode === 27 && modal.is(':visible')) {
             modal.fadeOut(300);
         }
@@ -33,7 +33,7 @@ jQuery(document).ready(function($) {
     // ========================================
     // View Request Details (AJAX)
     // ========================================
-    $(document).on('click', '.view-details', function(e) {
+    $(document).on('click', '.view-details', function (e) {
         e.preventDefault();
 
         var requestId = $(this).data('id');
@@ -51,14 +51,14 @@ jQuery(document).ready(function($) {
                 request_id: requestId,
                 nonce: approval_ajax.nonce
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     modalBody.html(response.data.html);
                 } else {
                     modalBody.html('<div class="error-message"><p>' + (response.data.message || 'Error loading request details.') + '</p></div>');
                 }
             },
-            error: function() {
+            error: function () {
                 modalBody.html('<div class="error-message"><p>An error occurred while loading request details.</p></div>');
             }
         });
@@ -67,7 +67,7 @@ jQuery(document).ready(function($) {
     // ========================================
     // Quick Approve/Reject from Table
     // ========================================
-    $(document).on('click', '.quick-approve, .quick-reject', function(e) {
+    $(document).on('click', '.quick-approve, .quick-reject', function (e) {
         e.preventDefault();
 
         var button = $(this);
@@ -95,13 +95,13 @@ jQuery(document).ready(function($) {
                 admin_notes: '',
                 nonce: approval_ajax.nonce
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     // Show success message
                     showNotification(response.data.message, 'success');
 
                     // Reload page after short delay
-                    setTimeout(function() {
+                    setTimeout(function () {
                         location.reload();
                     }, 1000);
                 } else {
@@ -109,7 +109,7 @@ jQuery(document).ready(function($) {
                     button.prop('disabled', false).text(isApprove ? 'Approve' : 'Reject');
                 }
             },
-            error: function() {
+            error: function () {
                 showNotification('An error occurred. Please try again.', 'error');
                 button.prop('disabled', false).text(isApprove ? 'Approve' : 'Reject');
             }
@@ -119,7 +119,7 @@ jQuery(document).ready(function($) {
     // ========================================
     // Modal Approve/Reject
     // ========================================
-    $(document).on('click', '.modal-approve, .modal-reject', function(e) {
+    $(document).on('click', '.modal-approve, .modal-reject', function (e) {
         e.preventDefault();
 
         var button = $(this);
@@ -143,13 +143,13 @@ jQuery(document).ready(function($) {
                 admin_notes: adminNotes,
                 nonce: approval_ajax.nonce
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     // Show success message
                     modalBody.html('<div class="success-message" style="text-align: center; padding: 40px;"><span class="dashicons dashicons-yes-alt" style="font-size: 64px; color: #10b981; width: 64px; height: 64px;"></span><h3>' + response.data.message + '</h3><p>Refreshing page...</p></div>');
 
                     // Reload page after short delay
-                    setTimeout(function() {
+                    setTimeout(function () {
                         location.reload();
                     }, 1500);
                 } else {
@@ -158,7 +158,7 @@ jQuery(document).ready(function($) {
                     button.html(isApprove ? '<span class="dashicons dashicons-yes"></span> Approve' : '<span class="dashicons dashicons-no"></span> Reject');
                 }
             },
-            error: function() {
+            error: function () {
                 showNotification('An error occurred. Please try again.', 'error');
                 $('.modal-approve, .modal-reject').prop('disabled', false);
                 button.html(isApprove ? '<span class="dashicons dashicons-yes"></span> Approve' : '<span class="dashicons dashicons-no"></span> Reject');
@@ -169,13 +169,13 @@ jQuery(document).ready(function($) {
     // ========================================
     // Bulk Actions
     // ========================================
-    $('#cb-select-all').on('change', function() {
+    $('#cb-select-all').on('change', function () {
         var checked = $(this).prop('checked');
         $('input[name="request_ids[]"]').prop('checked', checked);
     });
 
     // Form submission validation
-    $('#approval-bulk-form').on('submit', function(e) {
+    $('#approval-bulk-form').on('submit', function (e) {
         var action = $('#bulk-action-selector').val();
         var checkedCount = $('input[name="request_ids[]"]:checked').length;
 
@@ -212,8 +212,8 @@ jQuery(document).ready(function($) {
 
         $('body').append(notification);
 
-        setTimeout(function() {
-            notification.fadeOut(300, function() {
+        setTimeout(function () {
+            notification.fadeOut(300, function () {
                 $(this).remove();
             });
         }, 3000);
@@ -224,11 +224,7 @@ jQuery(document).ready(function($) {
     // ========================================
     $('.row-actions').css('visibility', 'visible');
 
-    // ========================================
-    // Add CSS animation
-    // ========================================
-    var style = $('<style>@keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }</style>');
-    $('head').append(style);
+
 
     // ========================================
     // Show bulk update success message
@@ -251,7 +247,7 @@ jQuery(document).ready(function($) {
     // ========================================
     // Keyboard Shortcuts
     // ========================================
-    $(document).on('keydown', function(e) {
+    $(document).on('keydown', function (e) {
         // Ctrl/Cmd + R for refresh (allow default)
         // ESC to close modal (handled above)
 
@@ -277,7 +273,7 @@ jQuery(document).ready(function($) {
     // ========================================
     // Smooth scrolling for status filters
     // ========================================
-    $('.subsubsub a').on('click', function() {
+    $('.subsubsub a').on('click', function () {
         $('html, body').animate({
             scrollTop: 0
         }, 300);
@@ -287,10 +283,10 @@ jQuery(document).ready(function($) {
     // Table row highlighting
     // ========================================
     $('.approval-requests-table tbody tr').hover(
-        function() {
+        function () {
             $(this).css('box-shadow', '0 2px 8px rgba(0,0,0,0.08)');
         },
-        function() {
+        function () {
             $(this).css('box-shadow', 'none');
         }
     );
@@ -307,7 +303,7 @@ jQuery(document).ready(function($) {
     // ========================================
     // Statistics Cards Animation on Page Load
     // ========================================
-    $('.approval-stat-card').each(function(index) {
+    $('.approval-stat-card').each(function (index) {
         $(this).css({
             'opacity': '0',
             'transform': 'translateY(20px)'
@@ -315,7 +311,7 @@ jQuery(document).ready(function($) {
             'opacity': '1'
         }, {
             duration: 500,
-            step: function(now) {
+            step: function (now) {
                 $(this).css('transform', 'translateY(' + (20 - (now * 20)) + 'px)');
             }
         });
@@ -327,7 +323,7 @@ jQuery(document).ready(function($) {
     function animateNumber(element, target) {
         var current = 0;
         var increment = target / 30;
-        var timer = setInterval(function() {
+        var timer = setInterval(function () {
             current += increment;
             if (current >= target) {
                 current = target;
@@ -344,8 +340,8 @@ jQuery(document).ready(function($) {
     }
 
     // Animate stat numbers on page load
-    setTimeout(function() {
-        $('.stat-number').each(function() {
+    setTimeout(function () {
+        $('.stat-number').each(function () {
             var text = $(this).text();
             var number = parseInt(text);
             if (!isNaN(number)) {
@@ -358,10 +354,10 @@ jQuery(document).ready(function($) {
     // ========================================
     // Search Functionality
     // ========================================
-    $('#approval-search-input').on('keyup', function() {
+    $('#approval-search-input, #user-search-input').on('keyup', function () {
         var searchTerm = $(this).val().toLowerCase();
 
-        $('.approval-requests-table tbody tr').each(function() {
+        $('.approval-requests-table tbody tr').each(function () {
             if ($(this).hasClass('no-search-results')) {
                 return;
             }
@@ -385,6 +381,97 @@ jQuery(document).ready(function($) {
             }
         } else {
             $('.no-search-results').remove();
+        }
+    });
+});
+
+jQuery(document).ready(function ($) {
+    // ========================================
+    // Settings Page Tabs
+    // ========================================
+    $('.nav-tab').on('click', function (e) {
+        if ($(this).attr('href').indexOf('#') === 0 && $(this).parents('.approval-settings-tabs').length > 0) {
+            e.preventDefault();
+            var target = $(this).attr('href');
+            $('.nav-tab').removeClass('nav-tab-active');
+            $(this).addClass('nav-tab-active');
+            $('.tab-content').removeClass('active');
+            $(target).addClass('active');
+        }
+    });
+
+    // ========================================
+    // Users Page Actions
+    // ========================================
+    $('.user-quick-approve, .user-quick-deny').on('click', function (e) {
+        e.preventDefault();
+        var button = $(this);
+        var userId = button.data('user-id');
+        var isApprove = button.hasClass('user-quick-approve');
+
+        // Use localized strings if available
+        var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+
+        var action = isApprove ? (strings.approve || 'approve') : (strings.deny || 'deny');
+        var confirmMsg = (strings.confirm_single || 'Are you sure you want to') + ' ' + action + ' ' + (strings.this_user || 'this user?');
+
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        var loadingText = isApprove ? (strings.approving || 'Approving...') : (strings.denying || 'Denying...');
+        button.prop('disabled', true).text(loadingText);
+
+        $.ajax({
+            url: approval_ajax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'approval_update_user_status',
+                user_id: userId,
+                status: isApprove ? 'approved' : 'denied',
+                admin_notes: '',
+                nonce: approval_ajax.nonce
+            },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.data.message || (strings.error || 'An error occurred'));
+                    button.prop('disabled', false).text(isApprove ? (strings.approve_btn || 'Approve') : (strings.deny_btn || 'Deny'));
+                }
+            },
+            error: function () {
+                alert(strings.error || 'An error occurred');
+                button.prop('disabled', false).text(isApprove ? (strings.approve_btn || 'Approve') : (strings.deny_btn || 'Deny'));
+            }
+        });
+    });
+
+    // Bulk Actions for Users
+    $('#approval-users-form').on('submit', function (e) {
+        var action = $('#bulk-action-selector-users').val();
+
+        if (action === 'approve' || action === 'deny') {
+            var checked = $('input[name="user_ids[]"]:checked').length;
+            var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+
+            if (checked === 0) {
+                e.preventDefault();
+                alert(strings.select_user || 'Please select at least one user.');
+                return;
+            }
+
+            var actionText = action === 'approve' ? (strings.approve || 'approve') : (strings.deny || 'deny');
+            var confirmMsg = (strings.confirm_bulk || 'Are you sure you want to') + ' ' + actionText + ' ' + checked + ' ' + (strings.users_part || 'user(s)?');
+
+            if (!confirm(confirmMsg)) {
+                e.preventDefault();
+            }
+        } else if (action === '-1') {
+            // Let WP handle or just alert
+            var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+            e.preventDefault();
+            alert(strings.select_action || 'Please select an action.');
         }
     });
 });

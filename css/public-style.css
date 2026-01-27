@@ -1,0 +1,142 @@
+/**
+ * Request Flow Pro - Public Styles (Frontend)
+ * Matches premium minimal aesthetic
+ */
+
+:root {
+    --rfp-primary: #6200EA;
+    --rfp-primary-hover: #5000BF;
+    --rfp-text-main: #111827;
+    --rfp-text-sub: #6B7280;
+    --rfp-border: #E5E7EB;
+    --rfp-bg-field: #F9FAFB;
+    --rfp-radius: 12px;
+    --rfp-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Form Container */
+.approval-request-form {
+    max-width: 600px;
+    margin: 0 auto;
+    font-family: var(--rfp-font);
+    background: #fff;
+    padding: 32px;
+    border-radius: var(--rfp-radius);
+    border: 1px solid var(--rfp-border);
+    /* No shadow as requested */
+}
+
+/* Form Groups */
+.approval-form-row {
+    margin-bottom: 24px;
+}
+
+.approval-form-row label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--rfp-text-main);
+    font-size: 14px;
+}
+
+/* Inputs */
+.approval-form-row input[type="text"],
+.approval-form-row input[type="email"],
+.approval-form-row textarea,
+.approval-form-row select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--rfp-border);
+    border-radius: 8px;
+    font-size: 15px;
+    color: var(--rfp-text-main);
+    background: var(--rfp-bg-field);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    box-shadow: none !important;
+}
+
+.approval-form-row input:focus,
+.approval-form-row textarea:focus,
+.approval-form-row select:focus {
+    outline: none;
+    border-color: var(--rfp-primary);
+    background: #fff;
+    /* Optional: very subtle focus ring if allowed, but keeping it flat for now */
+}
+
+/* Submit Button */
+.approval-submit-btn {
+    width: 100%;
+    background: var(--rfp-primary) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    padding: 14px 24px !important;
+    border-radius: 50px !important;
+    border: none !important;
+    cursor: pointer !important;
+    font-size: 16px !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.approval-submit-btn:hover {
+    background: var(--rfp-primary-hover) !important;
+    transform: translateY(-1px);
+}
+
+.approval-submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Status Messages */
+.approval-message {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.approval-message-success {
+    background: #E8F5E9;
+    color: #10B981;
+    border: 1px solid #10B981;
+}
+
+.approval-message-error {
+    background: #FFEBEE;
+    color: #EF4444;
+    border: 1px solid #EF4444;
+}
+
+/* Spinner Icon */
+.spinner-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .approval-request-form {
+        padding: 20px;
+        border: none;
+        /* Remove border on mobile to look integrated */
+    }
+}

@@ -8,7 +8,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class ApprovalUsers {
+class ApprovalUsers
+{
 
     // User status constants
     const STATUS_PENDING = 'pending';
@@ -18,7 +19,8 @@ class ApprovalUsers {
     // Meta key for user approval status
     const META_KEY = 'approval_status';
 
-    public function __construct() {
+    public function __construct()
+    {
         // Registration hooks
         add_action('user_register', array($this, 'user_registered'), 10, 1);
 
@@ -47,7 +49,8 @@ class ApprovalUsers {
     /**
      * Handle new user registration
      */
-    public function user_registered($user_id) {
+    public function user_registered($user_id)
+    {
         // Check if user approval is enabled
         if (!get_option('approval_plugin_enable_user_approval', 0)) {
             return;
@@ -69,7 +72,8 @@ class ApprovalUsers {
     /**
      * Authenticate user - block login for pending/denied users
      */
-    public function authenticate_user($user, $password) {
+    public function authenticate_user($user, $password)
+    {
         if (is_wp_error($user)) {
             return $user;
         }
@@ -83,14 +87,14 @@ class ApprovalUsers {
         if ($status === self::STATUS_PENDING) {
             return new WP_Error(
                 'pending_approval',
-                __('<strong>ERROR</strong>: Your account is pending approval. You will receive an email once your account has been approved.', 'approval-plugin')
+                __('<strong>ERROR</strong>: Your account is pending approval. You will receive an email once your account has been approved.', 'request-flow-pro')
             );
         }
 
         if ($status === self::STATUS_DENIED) {
             return new WP_Error(
                 'account_denied',
-                __('<strong>ERROR</strong>: Your account registration has been denied.', 'approval-plugin')
+                __('<strong>ERROR</strong>: Your account registration has been denied.', 'request-flow-pro')
             );
         }
 
@@ -100,9 +104,10 @@ class ApprovalUsers {
     /**
      * Add custom login message
      */
-    public function login_message($message) {
+    public function login_message($message)
+    {
         if (isset($_GET['approval']) && $_GET['approval'] === 'pending') {
-            $message .= '<p class="message">' . __('Registration complete. Your account is pending approval.', 'approval-plugin') . '</p>';
+            $message .= '<p class="message">' . esc_html__('Registration complete. Your account is pending approval.', 'request-flow-pro') . '</p>';
         }
         return $message;
     }
@@ -110,10 +115,12 @@ class ApprovalUsers {
     /**
      * Add registration message
      */
-    public function registration_message($message) {
+    public function registration_message($message)
+    {
         if (get_option('approval_plugin_enable_user_approval', 0)) {
-            $custom_message = get_option('approval_plugin_user_registration_message',
-                __('After you register, your account will need to be approved before you can login.', 'approval-plugin')
+            $custom_message = get_option(
+                'approval_plugin_user_registration_message',
+                esc_html__('After you register, your account will need to be approved before you can login.', 'request-flow-pro')
             );
             $message .= '<p class="message">' . $custom_message . '</p>';
         }
@@ -123,7 +130,8 @@ class ApprovalUsers {
     /**
      * Get user approval status
      */
-    public function get_user_status($user_id) {
+    public function get_user_status($user_id)
+    {
         $status = get_user_meta($user_id, self::META_KEY, true);
 
         // If no status set, assume approved (for existing users)
@@ -137,7 +145,8 @@ class ApprovalUsers {
     /**
      * Update user status
      */
-    public function update_user_status($user_id, $status, $admin_notes = '') {
+    public function update_user_status($user_id, $status, $admin_notes = '')
+    {
         if (!in_array($status, array(self::STATUS_APPROVED, self::STATUS_DENIED, self::STATUS_PENDING))) {
             return false;
         }
@@ -156,16 +165,17 @@ class ApprovalUsers {
     /**
      * Add admin menu for user approvals
      */
-    public function add_users_menu() {
+    public function add_users_menu()
+    {
         // Get pending count for badge
         $pending_count = $this->get_users_count(self::STATUS_PENDING);
         $menu_title = $pending_count > 0
-            ? sprintf(__('User Approvals %s', 'approval-plugin'), '<span class="awaiting-mod count-' . $pending_count . '"><span class="pending-count">' . number_format_i18n($pending_count) . '</span></span>')
-            : __('User Approvals', 'approval-plugin');
+            ? sprintf(__('User Approvals %s', 'request-flow-pro'), '<span class="awaiting-mod count-' . $pending_count . '"><span class="pending-count">' . number_format_i18n($pending_count) . '</span></span>')
+            : __('User Approvals', 'request-flow-pro');
 
         add_submenu_page(
             'approval-requests',
-            __('User Approvals', 'approval-plugin'),
+            __('User Approvals', 'request-flow-pro'),
             $menu_title,
             'manage_options',
             'approval-users',
@@ -176,9 +186,10 @@ class ApprovalUsers {
     /**
      * Add approval column to users list
      */
-    public function add_approval_column($columns) {
+    public function add_approval_column($columns)
+    {
         if (get_option('approval_plugin_enable_user_approval', 0)) {
-            $columns['approval_status'] = __('Approval Status', 'approval-plugin');
+            $columns['approval_status'] = __('Approval Status', 'request-flow-pro');
         }
         return $columns;
     }
@@ -186,7 +197,8 @@ class ApprovalUsers {
     /**
      * Show approval status in user list column
      */
-    public function approval_column_content($value, $column_name, $user_id) {
+    public function approval_column_content($value, $column_name, $user_id)
+    {
         if ($column_name === 'approval_status') {
             $status = $this->get_user_status($user_id);
 
@@ -201,7 +213,8 @@ class ApprovalUsers {
     /**
      * Get count of users by status
      */
-    public function get_users_count($status) {
+    public function get_users_count($status)
+    {
         $args = array(
             'meta_key' => self::META_KEY,
             'meta_value' => $status,
@@ -216,7 +229,8 @@ class ApprovalUsers {
     /**
      * Get users by status
      */
-    public function get_users_by_status($status = null, $number = 20, $offset = 0) {
+    public function get_users_by_status($status = null, $number = 20, $offset = 0)
+    {
         $args = array(
             'number' => $number,
             'offset' => $offset,
@@ -235,14 +249,15 @@ class ApprovalUsers {
     /**
      * Send admin notification for new registration
      */
-    private function send_admin_notification($user_id) {
+    private function send_admin_notification($user_id)
+    {
         $user = get_userdata($user_id);
         $admin_email = get_option('approval_plugin_admin_email', get_option('admin_email'));
 
-        $subject = sprintf(__('[%s] New User Registration Pending Approval', 'approval-plugin'), get_bloginfo('name'));
+        $subject = sprintf(__('[%s] New User Registration Pending Approval', 'request-flow-pro'), get_bloginfo('name'));
 
         $message = sprintf(
-            __("A new user has registered and is pending approval:\n\nUsername: %s\nEmail: %s\nRegistered: %s\n\nTo approve or deny this user, visit:\n%s", 'approval-plugin'),
+            __("A new user has registered and is pending approval:\n\nUsername: %s\nEmail: %s\nRegistered: %s\n\nTo approve or deny this user, visit:\n%s", 'request-flow-pro'),
             $user->user_login,
             $user->user_email,
             date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($user->user_registered)),
@@ -255,14 +270,17 @@ class ApprovalUsers {
     /**
      * Send pending notification to user
      */
-    private function send_user_pending_notification($user_id) {
+    private function send_user_pending_notification($user_id)
+    {
         $user = get_userdata($user_id);
 
-        $subject = get_option('approval_plugin_user_pending_subject',
-            __('Your registration is pending approval', 'approval-plugin')
+        $subject = get_option(
+            'approval_plugin_user_pending_subject',
+            __('Your registration is pending approval', 'request-flow-pro')
         );
 
-        $body = get_option('approval_plugin_user_pending_body',
+        $body = get_option(
+            'approval_plugin_user_pending_body',
             "Hello {user_name},\n\nThank you for registering at {site_name}.\n\nYour account is currently pending approval. You will receive another email once your account has been approved.\n\nThank you for your patience!"
         );
 
@@ -283,23 +301,28 @@ class ApprovalUsers {
     /**
      * Send status change notification to user
      */
-    private function send_status_change_notification($user_id, $status, $admin_notes = '') {
+    private function send_status_change_notification($user_id, $status, $admin_notes = '')
+    {
         $user = get_userdata($user_id);
 
         if ($status === self::STATUS_APPROVED) {
-            $subject = get_option('approval_plugin_user_approved_subject',
-                __('Your account has been approved!', 'approval-plugin')
+            $subject = get_option(
+                'approval_plugin_user_approved_subject',
+                __('Your account has been approved!', 'request-flow-pro')
             );
 
-            $body = get_option('approval_plugin_user_approved_body',
+            $body = get_option(
+                'approval_plugin_user_approved_body',
                 "Hello {user_name},\n\nGreat news! Your account at {site_name} has been approved.\n\nYou can now login at: {site_url}/wp-login.php\n\nUsername: {username}\n\n{admin_notes}"
             );
         } else {
-            $subject = get_option('approval_plugin_user_denied_subject',
-                __('Your account registration', 'approval-plugin')
+            $subject = get_option(
+                'approval_plugin_user_denied_subject',
+                __('Your account registration', 'request-flow-pro')
             );
 
-            $body = get_option('approval_plugin_user_denied_body',
+            $body = get_option(
+                'approval_plugin_user_denied_body',
                 "Hello {user_name},\n\nWe regret to inform you that your registration at {site_name} has been denied.\n\n{admin_notes}\n\nIf you have any questions, please contact us."
             );
         }
@@ -322,13 +345,14 @@ class ApprovalUsers {
     /**
      * Handle single user action
      */
-    public function handle_user_action() {
+    public function handle_user_action()
+    {
         if (!wp_verify_nonce($_POST['_wpnonce'], 'approval_user_action')) {
-            wp_die(__('Security check failed.', 'approval-plugin'));
+            wp_die(esc_html__('Security check failed.', 'request-flow-pro'));
         }
 
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to perform this action.', 'approval-plugin'));
+            wp_die(esc_html__('You do not have permission to perform this action.', 'request-flow-pro'));
         }
 
         $user_id = intval($_POST['user_id']);
@@ -348,13 +372,14 @@ class ApprovalUsers {
     /**
      * Handle bulk user actions
      */
-    public function handle_bulk_user_action() {
+    public function handle_bulk_user_action()
+    {
         if (!wp_verify_nonce($_POST['_wpnonce'], 'approval_bulk_user_action')) {
-            wp_die(__('Security check failed.', 'approval-plugin'));
+            wp_die(esc_html__('Security check failed.', 'request-flow-pro'));
         }
 
         if (!current_user_can('manage_options')) {
-            wp_die(__('You do not have permission to perform this action.', 'approval-plugin'));
+            wp_die(esc_html__('You do not have permission to perform this action.', 'request-flow-pro'));
         }
 
         $action = sanitize_text_field($_POST['bulk_action']);
@@ -385,11 +410,12 @@ class ApprovalUsers {
     /**
      * AJAX: Update user status
      */
-    public function ajax_update_user_status() {
+    public function ajax_update_user_status()
+    {
         check_ajax_referer('approval_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'approval-plugin')));
+            wp_send_json_error(array('message' => __('Permission denied.', 'request-flow-pro')));
         }
 
         $user_id = intval($_POST['user_id']);
@@ -398,17 +424,18 @@ class ApprovalUsers {
 
         if ($this->update_user_status($user_id, $status, $admin_notes)) {
             wp_send_json_success(array(
-                'message' => sprintf(__('User %s successfully!', 'approval-plugin'), $status)
+                'message' => sprintf(__('User %s successfully!', 'request-flow-pro'), $status)
             ));
         } else {
-            wp_send_json_error(array('message' => __('Failed to update user.', 'approval-plugin')));
+            wp_send_json_error(array('message' => __('Failed to update user.', 'request-flow-pro')));
         }
     }
 
     /**
      * Users approval page
      */
-    public function users_page() {
+    public function users_page()
+    {
         $status_filter = isset($_GET['user_status']) ? sanitize_text_field($_GET['user_status']) : null;
 
         $user_query = $this->get_users_by_status($status_filter, 50, 0);

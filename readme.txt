@@ -1,5 +1,5 @@
 === Request Flow Pro ===
-Contributors: (your-wordpress-username)
+Contributors: zeshanamin
 Tags: approval, workflow, requests, admin, management, forms
 Requires at least: 5.0
 Tested up to: 6.8
@@ -100,7 +100,7 @@ Use shortcodes:
 
 1. Log into your WordPress admin
 2. Go to Plugins → Add New
-3. Search for "Approval Plugin"
+3. Search for "Request Flow Pro"
 4. Click "Install Now"
 5. Activate the plugin
 
@@ -165,7 +165,7 @@ Yes! Requests can be categorized as General, Budget, Purchase, Vacation, Project
 
 = Is it translation ready? =
 
-Yes! The plugin uses WordPress translation standards and includes the text domain 'approval-plugin'.
+Yes! The plugin uses WordPress translation standards and includes the text domain 'request-flow-pro'.
 
 = What happens when I uninstall? =
 
