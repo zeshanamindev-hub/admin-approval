@@ -1,8 +1,8 @@
 === Request Flow Pro ===
 Contributors: zeshanamin
 Tags: approval, workflow, requests, admin, management, forms
-Requires at least: 5.0
-Tested up to: 6.8
+Requires at least: 6.0
+Tested up to: 6.9
 Requires PHP: 7.2
 Stable tag: 1.0.0
 License: GPLv2 or later
