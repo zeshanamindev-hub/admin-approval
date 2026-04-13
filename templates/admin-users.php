@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
             </p>
         </div>
         <div class="page-header-right">
-            <a href="<?php echo admin_url('admin.php?page=approval-settings&tab=users'); ?>"
+            <a href="<?php echo esc_url(admin_url('admin.php?page=requflpr-settings&tab=users')); ?>"
                 class="button button-secondary header-action-btn">
                 <span class="dashicons dashicons-admin-settings"></span>
                 <?php esc_html_e('User Settings', 'request-flow-pro'); ?>
@@ -84,21 +84,21 @@ if (!defined('ABSPATH')) {
     <div class="approval-filters-wrapper">
         <div class="approval-filters-section">
             <div class="filter-tabs">
-                <a href="?page=approval-users" class="filter-tab <?php echo !$status_filter ? 'active' : ''; ?>">
+                <a href="?page=requflpr-users" class="filter-tab <?php echo !$status_filter ? 'active' : ''; ?>">
                     <span class="tab-label"><?php esc_html_e('All Users', 'request-flow-pro'); ?></span>
                     <span class="tab-count"><?php echo esc_html($counts['all']); ?></span>
                 </a>
-                <a href="?page=approval-users&user_status=pending"
+                <a href="?page=requflpr-users&user_status=pending"
                     class="filter-tab <?php echo $status_filter === 'pending' ? 'active' : ''; ?>">
                     <span class="tab-label"><?php esc_html_e('Pending', 'request-flow-pro'); ?></span>
                     <span class="tab-count"><?php echo esc_html($counts['pending']); ?></span>
                 </a>
-                <a href="?page=approval-users&user_status=approved"
+                <a href="?page=requflpr-users&user_status=approved"
                     class="filter-tab <?php echo $status_filter === 'approved' ? 'active' : ''; ?>">
                     <span class="tab-label"><?php esc_html_e('Approved', 'request-flow-pro'); ?></span>
                     <span class="tab-count"><?php echo esc_html($counts['approved']); ?></span>
                 </a>
-                <a href="?page=approval-users&user_status=denied"
+                <a href="?page=requflpr-users&user_status=denied"
                     class="filter-tab <?php echo $status_filter === 'denied' ? 'active' : ''; ?>">
                     <span class="tab-label"><?php esc_html_e('Denied', 'request-flow-pro'); ?></span>
                     <span class="tab-count"><?php echo esc_html($counts['denied']); ?></span>
@@ -106,16 +106,15 @@ if (!defined('ABSPATH')) {
             </div>
             <div class="filter-actions">
                 <input type="text" id="user-search-input"
-                    placeholder="<?php esc_attr_e('Search users...', 'request-flow-pro'); ?>"
-                    class="approval-search-box">
+                    placeholder="<?php esc_attr_e('Search users...', 'request-flow-pro'); ?>" class="approval-search-box">
             </div>
         </div>
     </div>
 
     <!-- Users Table -->
-    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="approval-users-form">
-        <input type="hidden" name="action" value="approval_bulk_user_action">
-        <?php wp_nonce_field('approval_bulk_user_action'); ?>
+    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="requflpr-users-form">
+        <input type="hidden" name="action" value="requflpr_bulk_user_action">
+        <?php wp_nonce_field('requflpr_bulk_user_action'); ?>
 
         <div class="tablenav top">
             <div class="alignleft actions bulkactions">
@@ -128,7 +127,7 @@ if (!defined('ABSPATH')) {
             </div>
         </div>
 
-        <table class="wp-list-table widefat fixed striped approval-requests-table users-table">
+        <table class="wp-list-table widefat fixed striped requflpr-requests-table users-table">
             <thead>
                 <tr>
                     <td class="check-column"><input type="checkbox" id="cb-select-all-users"></td>
@@ -147,46 +146,49 @@ if (!defined('ABSPATH')) {
                         <td colspan="8" class="no-requests"><?php esc_html_e('No users found.', 'request-flow-pro'); ?></td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($users as $user):
-                        $status = get_user_meta($user->ID, 'approval_status', true);
-                        if (empty($status)) {
-                            $status = 'approved'; // Existing users are approved by default
+                    <?php foreach ($users as $requflpr_approval_user_item):
+                        $requflpr_approval_status = get_user_meta($requflpr_approval_user_item->ID, 'requflpr_status', true);
+                        if (empty($requflpr_approval_status)) {
+                            $requflpr_approval_status = 'approved'; // Existing users are approved by default
                         }
-                        $user_data = get_userdata($user->ID);
-                        $roles = !empty($user_data->roles) ? implode(', ', $user_data->roles) : esc_html__('No role', 'request-flow-pro');
+                        $requflpr_approval_user_data = get_userdata($requflpr_approval_user_item->ID);
+                        $requflpr_approval_roles = !empty($requflpr_approval_user_data->roles) ? implode(', ', $requflpr_approval_user_data->roles) : esc_html__('No role', 'request-flow-pro');
                         ?>
                         <tr>
                             <th class="check-column">
-                                <input type="checkbox" name="user_ids[]" value="<?php echo esc_attr($user->ID); ?>">
+                                <input type="checkbox" name="user_ids[]"
+                                    value="<?php echo esc_attr($requflpr_approval_user_item->ID); ?>">
                             </th>
                             <td>
-                                <strong><?php echo esc_html($user_data->user_login); ?></strong>
+                                <strong><?php echo esc_html($requflpr_approval_user_data->user_login); ?></strong>
                                 <div class="row-actions">
                                     <span><a
-                                            href="<?php echo get_edit_user_link($user->ID); ?>"><?php esc_html_e('Edit', 'request-flow-pro'); ?></a></span>
+                                            href="<?php echo esc_url(get_edit_user_link($requflpr_approval_user_item->ID)); ?>"><?php esc_html_e('Edit', 'request-flow-pro'); ?></a></span>
                                 </div>
                             </td>
-                            <td><?php echo esc_html($user_data->display_name); ?></td>
-                            <td><?php echo esc_html($user_data->user_email); ?></td>
-                            <td><?php echo esc_html(ucfirst($roles)); ?></td>
+                            <td><?php echo esc_html($requflpr_approval_user_data->display_name); ?></td>
+                            <td><?php echo esc_html($requflpr_approval_user_data->user_email); ?></td>
+                            <td><?php echo esc_html(ucfirst($requflpr_approval_roles)); ?></td>
                             <td>
-                                <span class="status-badge status-<?php echo esc_attr($status); ?>">
-                                    <?php echo esc_html(ucfirst($status)); ?>
+                                <span class="status-badge status-<?php echo esc_attr($requflpr_approval_status); ?>">
+                                    <?php echo esc_html(ucfirst($requflpr_approval_status)); ?>
                                 </span>
                             </td>
-                            <td><?php echo date_i18n(get_option('date_format'), strtotime($user_data->user_registered)); ?></td>
+                            <td><?php echo esc_html(date_i18n(get_option('date_format'), strtotime($requflpr_approval_user_data->user_registered))); ?>
+                            </td>
                             <td class="approval-actions-cell">
-                                <?php if ($status === 'pending'): ?>
+                                <?php if ($requflpr_approval_status === 'pending'): ?>
                                     <button type="button" class="button button-primary button-small user-quick-approve"
-                                        data-user-id="<?php echo intval($user->ID); ?>">
+                                        data-user-id="<?php echo intval($requflpr_approval_user_item->ID); ?>">
                                         <?php esc_html_e('Approve', 'request-flow-pro'); ?>
                                     </button>
                                     <button type="button" class="button button-small user-quick-deny"
-                                        data-user-id="<?php echo intval($user->ID); ?>">
+                                        data-user-id="<?php echo intval($requflpr_approval_user_item->ID); ?>">
                                         <?php esc_html_e('Deny', 'request-flow-pro'); ?>
                                     </button>
                                 <?php else: ?>
-                                    <span class="dashicons dashicons-<?php echo $status === 'approved' ? 'yes' : 'no'; ?>"></span>
+                                    <span
+                                        class="dashicons dashicons-<?php echo $requflpr_approval_status === 'approved' ? 'yes' : 'no'; ?>"></span>
                                 <?php endif; ?>
                             </td>
                         </tr>

@@ -7,15 +7,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class ApprovalShortcodes
+class RequflprShortcodes
 {
 
     public function __construct()
     {
-        add_shortcode('approval_form', array($this, 'approval_form_shortcode'));
+        add_shortcode('requflpr_form', array($this, 'approval_form_shortcode'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_scripts'));
-        add_action('wp_ajax_submit_approval_request', array($this, 'handle_form_submission'));
-        add_action('wp_ajax_nopriv_submit_approval_request', array($this, 'handle_form_submission'));
+        add_action('wp_ajax_requflpr_submit_approval_request', array($this, 'handle_form_submission'));
+        add_action('wp_ajax_nopriv_requflpr_submit_approval_request', array($this, 'handle_form_submission'));
     }
 
     /**
@@ -23,12 +23,12 @@ class ApprovalShortcodes
      */
     public function enqueue_frontend_scripts()
     {
-        wp_enqueue_style('approval-public-css', APPROVAL_PLUGIN_URL . 'css/public-style.css', array(), APPROVAL_PLUGIN_VERSION);
-        wp_enqueue_script('approval-public-js', APPROVAL_PLUGIN_URL . 'js/public-script.js', array('jquery'), APPROVAL_PLUGIN_VERSION, true);
+        wp_enqueue_style('requflpr-public-css', REQUFLPR_URL . 'css/public-style.css', array(), REQUFLPR_VERSION);
+        wp_enqueue_script('requflpr-public-js', REQUFLPR_URL . 'js/public-script.js', array('jquery'), REQUFLPR_VERSION, true);
 
-        wp_localize_script('approval-public-js', 'approval_ajax', array(
+        wp_localize_script('requflpr-public-js', 'requflpr_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce' => wp_create_nonce('approval_form_nonce'),
+            'nonce' => wp_create_nonce('requflpr_form_nonce'),
             'strings' => array(
                 'fill_required' => __('Please fill in all required fields.', 'request-flow-pro'),
                 'submitting' => __('Submitting...', 'request-flow-pro'),
@@ -56,7 +56,7 @@ class ApprovalShortcodes
             <div class="form-header">
                 <h2 class="form-title"><?php echo esc_html($atts['title']); ?></h2>
                 <p class="form-subtitle">
-                    <?php _e('Fill out the form below to submit your approval request', 'request-flow-pro'); ?>
+                    <?php esc_html_e('Fill out the form below to submit your approval request', 'request-flow-pro'); ?>
                 </p>
             </div>
 
@@ -65,7 +65,7 @@ class ApprovalShortcodes
                 <div class="form-steps">
                     <div class="form-step active" data-step="1">
                         <div class="step-number">1</div>
-                        <div class="step-label"><?php _e('Basic Info', 'request-flow-pro'); ?></div>
+                        <div class="step-label"><?php esc_html_e('Basic Info', 'request-flow-pro'); ?></div>
                     </div>
                     <div class="form-step" data-step="2">
                         <div class="step-number">2</div>
@@ -107,9 +107,9 @@ class ApprovalShortcodes
                             </label>
                             <select id="approval-priority" name="priority">
                                 <option value="low"><?php esc_html_e('Low', 'request-flow-pro'); ?></option>
-                                <option value="medium" selected><?php _e('Medium', 'request-flow-pro'); ?></option>
-                                <option value="high"><?php _e('High', 'request-flow-pro'); ?></option>
-                                <option value="urgent"><?php _e('Urgent', 'request-flow-pro'); ?></option>
+                                <option value="medium" selected><?php esc_html_e('Medium', 'request-flow-pro'); ?></option>
+                                <option value="high"><?php esc_html_e('High', 'request-flow-pro'); ?></option>
+                                <option value="urgent"><?php esc_html_e('Urgent', 'request-flow-pro'); ?></option>
                             </select>
                         </div>
 
@@ -120,19 +120,19 @@ class ApprovalShortcodes
                             </label>
                             <select id="approval-category" name="category">
                                 <option value="general"><?php esc_html_e('General', 'request-flow-pro'); ?></option>
-                                <option value="budget"><?php _e('Budget', 'request-flow-pro'); ?></option>
-                                <option value="purchase"><?php _e('Purchase', 'request-flow-pro'); ?></option>
-                                <option value="vacation"><?php _e('Vacation', 'request-flow-pro'); ?></option>
-                                <option value="project"><?php _e('Project', 'request-flow-pro'); ?></option>
-                                <option value="other"><?php _e('Other', 'request-flow-pro'); ?></option>
+                                <option value="budget"><?php esc_html_e('Budget', 'request-flow-pro'); ?></option>
+                                <option value="purchase"><?php esc_html_e('Purchase', 'request-flow-pro'); ?></option>
+                                <option value="vacation"><?php esc_html_e('Vacation', 'request-flow-pro'); ?></option>
+                                <option value="project"><?php esc_html_e('Project', 'request-flow-pro'); ?></option>
+                                <option value="other"><?php esc_html_e('Other', 'request-flow-pro'); ?></option>
                             </select>
                         </div>
                     </div>
 
                     <?php if ($is_multistep): ?>
                         <div class="form-navigation">
-                            <button type="button" class="btn btn-next"
-                                data-next="2"><?php esc_html_e('Next', 'request-flow-pro'); ?> →</button>
+                            <button type="button" class="btn btn-next" data-next="2"><?php esc_html_e('Next', 'request-flow-pro'); ?>
+                                →</button>
                         </div>
                     </div>
 
@@ -156,8 +156,8 @@ class ApprovalShortcodes
                         <div class="form-navigation">
                             <button type="button" class="btn btn-prev" data-prev="1">←
                                 <?php esc_html_e('Previous', 'request-flow-pro'); ?></button>
-                            <button type="button" class="btn btn-next"
-                                data-next="3"><?php esc_html_e('Next', 'request-flow-pro'); ?> →</button>
+                            <button type="button" class="btn btn-next" data-next="3"><?php esc_html_e('Next', 'request-flow-pro'); ?>
+                                →</button>
                         </div>
                     </div>
 
@@ -217,7 +217,7 @@ class ApprovalShortcodes
     public function handle_form_submission()
     {
         // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'], 'approval_form_nonce')) {
+        if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'requflpr_form_nonce')) {
             wp_send_json_error(array('message' => __('Security check failed.', 'request-flow-pro')));
         }
 
@@ -225,22 +225,25 @@ class ApprovalShortcodes
         $required_fields = array('title', 'description', 'submitter_name', 'submitter_email');
         foreach ($required_fields as $field) {
             if (empty($_POST[$field])) {
+                /* translators: %s: field name */
                 wp_send_json_error(array('message' => sprintf(__('The %s field is required.', 'request-flow-pro'), $field)));
             }
         }
 
         // Validate email
-        if (!is_email($_POST['submitter_email'])) {
+        $raw_email = isset($_POST['submitter_email']) ? wp_unslash($_POST['submitter_email']) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+        if (!is_email($raw_email)) {
             wp_send_json_error(array('message' => __('Please enter a valid email address.', 'request-flow-pro')));
         }
 
         // Check domain whitelist/blacklist
-        $email = sanitize_email($_POST['submitter_email']);
+        $email = sanitize_email($raw_email);
         $domain = substr(strrchr($email, "@"), 1);
 
         // Check whitelist
-        if (get_option('approval_plugin_whitelist_enabled', 0)) {
-            $whitelist = get_option('approval_plugin_domain_whitelist', '');
+        if (get_option('requflpr_whitelist_enabled', 0)) {
+            $whitelist = get_option('requflpr_domain_whitelist', '');
             $whitelisted_domains = array_filter(array_map('trim', explode("\n", $whitelist)));
 
             if (!empty($whitelisted_domains) && !in_array($domain, $whitelisted_domains)) {
@@ -249,8 +252,8 @@ class ApprovalShortcodes
         }
 
         // Check blacklist
-        if (get_option('approval_plugin_blacklist_enabled', 0)) {
-            $blacklist = get_option('approval_plugin_domain_blacklist', '');
+        if (get_option('requflpr_blacklist_enabled', 0)) {
+            $blacklist = get_option('requflpr_domain_blacklist', '');
             $blacklisted_domains = array_filter(array_map('trim', explode("\n", $blacklist)));
 
             if (!empty($blacklisted_domains) && in_array($domain, $blacklisted_domains)) {
@@ -260,16 +263,16 @@ class ApprovalShortcodes
 
         // Prepare data
         $data = array(
-            'title' => sanitize_text_field($_POST['title']),
-            'description' => sanitize_textarea_field($_POST['description']),
-            'submitter_name' => sanitize_text_field($_POST['submitter_name']),
+            'title' => isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '',
+            'description' => isset($_POST['description']) ? sanitize_textarea_field(wp_unslash($_POST['description'])) : '',
+            'submitter_name' => isset($_POST['submitter_name']) ? sanitize_text_field(wp_unslash($_POST['submitter_name'])) : '',
             'submitter_email' => $email,
-            'priority' => isset($_POST['priority']) ? sanitize_text_field($_POST['priority']) : 'medium',
-            'category' => isset($_POST['category']) ? sanitize_text_field($_POST['category']) : 'general'
+            'priority' => isset($_POST['priority']) ? sanitize_text_field(wp_unslash($_POST['priority'])) : 'medium',
+            'category' => isset($_POST['category']) ? sanitize_text_field(wp_unslash($_POST['category'])) : 'general'
         );
 
         // Insert into database
-        $request_id = ApprovalDatabase::insert_request($data);
+        $request_id = RequflprDatabase::insert_request($data);
 
         if ($request_id) {
             // Send notification to admin
@@ -278,7 +281,7 @@ class ApprovalShortcodes
             // Send pending confirmation to user
             $this->send_pending_notification($request_id);
 
-            $pending_message = get_option('approval_plugin_show_pending_message', __('Your request has been submitted successfully! You will receive an email notification when the status changes.', 'request-flow-pro'));
+            $pending_message = get_option('requflpr_show_pending_message', __('Your request has been submitted successfully! You will receive an email notification when the status changes.', 'request-flow-pro'));
 
             wp_send_json_success(array('message' => $pending_message));
         } else {
@@ -291,28 +294,30 @@ class ApprovalShortcodes
      */
     private function send_admin_notification($request_id)
     {
-        $request = ApprovalDatabase::get_request($request_id);
-        $admin_email = get_option('approval_plugin_admin_email', get_option('admin_email'));
+        $request = RequflprDatabase::get_request($request_id);
+        $admin_email = get_option('requflpr_admin_email', get_option('admin_email'));
 
         if ($request && $admin_email) {
-            $from_name = get_option('approval_plugin_email_from_name', get_bloginfo('name'));
-            $from_email = get_option('approval_plugin_email_from_email', get_option('admin_email'));
+            $from_name = get_option('requflpr_email_from_name', get_bloginfo('name'));
+            $from_email = get_option('requflpr_email_from_email', get_option('admin_email'));
 
             $headers = array(
                 'From: ' . $from_name . ' <' . $from_email . '>',
                 'Content-Type: text/html; charset=UTF-8'
             );
 
+            /* translators: %s: request title */
             $subject = sprintf(__('New approval request: %s', 'request-flow-pro'), $request->title);
+            /* translators: 1: title, 2: priority, 3: category, 4: submitter name, 5: submitter email, 6: description, 7: admin URL */
             $message = sprintf(
-                __("<p>A new approval request has been submitted:</p><p><strong>Title:</strong> %s<br><strong>Priority:</strong> %s<br><strong>Category:</strong> %s<br><strong>Submitter:</strong> %s (%s)<br><strong>Description:</strong><br>%s</p><p><a href='%s'>View and manage this request in your WordPress admin panel</a></p>", 'request-flow-pro'),
+                __("<p>A new approval request has been submitted:</p><p><strong>Title:</strong> %1\$s<br><strong>Priority:</strong> %2\$s<br><strong>Category:</strong> %3\$s<br><strong>Submitter:</strong> %4\$s (%5\$s)<br><strong>Description:</strong><br>%6\$s</p><p><a href='%7\$s'>View and manage this request in your WordPress admin panel</a></p>", 'request-flow-pro'),
                 $request->title,
                 ucfirst($request->priority),
                 ucfirst($request->category),
                 $request->submitter_name,
                 $request->submitter_email,
                 nl2br(esc_html($request->description)),
-                admin_url('admin.php?page=approval-requests')
+                admin_url('admin.php?page=requflpr-requests')
             );
 
             wp_mail($admin_email, $subject, $message, $headers);
@@ -324,23 +329,23 @@ class ApprovalShortcodes
      */
     private function send_pending_notification($request_id)
     {
-        if (!get_option('approval_plugin_email_notifications', 1)) {
+        if (!get_option('requflpr_email_notifications', 1)) {
             return;
         }
 
-        $request = ApprovalDatabase::get_request($request_id);
+        $request = RequflprDatabase::get_request($request_id);
 
         if ($request) {
-            $from_name = get_option('approval_plugin_email_from_name', get_bloginfo('name'));
-            $from_email = get_option('approval_plugin_email_from_email', get_option('admin_email'));
+            $from_name = get_option('requflpr_email_from_name', get_bloginfo('name'));
+            $from_email = get_option('requflpr_email_from_email', get_option('admin_email'));
 
             $headers = array(
                 'From: ' . $from_name . ' <' . $from_email . '>',
                 'Content-Type: text/html; charset=UTF-8'
             );
 
-            $subject = get_option('approval_plugin_email_pending_subject', __('Your request has been received', 'request-flow-pro'));
-            $body_template = get_option('approval_plugin_email_pending_body', "Hello {user_name},\n\nThank you for submitting your request \"{request_title}\".\n\nYour request is currently pending review. You will receive an email notification once it has been processed.\n\nThank you for your patience,\n{site_name}");
+            $subject = get_option('requflpr_email_pending_subject', __('Your request has been received', 'request-flow-pro'));
+            $body_template = get_option('requflpr_email_pending_body', "Hello {user_name},\n\nThank you for submitting your request \"{request_title}\".\n\nYour request is currently pending review. You will receive an email notification once it has been processed.\n\nThank you for your patience,\n{site_name}");
 
             // Replace placeholders
             $subject = $this->replace_placeholders($subject, $request);

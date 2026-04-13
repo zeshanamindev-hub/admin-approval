@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class ApprovalUsers
+class RequflprUsers
 {
 
     // User status constants
@@ -17,7 +17,7 @@ class ApprovalUsers
     const STATUS_DENIED = 'denied';
 
     // Meta key for user approval status
-    const META_KEY = 'approval_status';
+    const META_KEY = 'requflpr_status';
 
     public function __construct()
     {
@@ -36,11 +36,11 @@ class ApprovalUsers
         add_filter('manage_users_custom_column', array($this, 'approval_column_content'), 10, 3);
 
         // User actions
-        add_action('admin_post_approval_user_action', array($this, 'handle_user_action'));
-        add_action('admin_post_approval_bulk_user_action', array($this, 'handle_bulk_user_action'));
+        add_action('admin_post_requflpr_user_action', array($this, 'handle_user_action'));
+        add_action('admin_post_requflpr_bulk_user_action', array($this, 'handle_bulk_user_action'));
 
         // AJAX actions
-        add_action('wp_ajax_approval_update_user_status', array($this, 'ajax_update_user_status'));
+        add_action('wp_ajax_requflpr_update_user_status', array($this, 'ajax_update_user_status'));
 
         // Registration form message
         add_filter('register_message', array($this, 'registration_message'));
@@ -52,7 +52,7 @@ class ApprovalUsers
     public function user_registered($user_id)
     {
         // Check if user approval is enabled
-        if (!get_option('approval_plugin_enable_user_approval', 0)) {
+        if (!get_option('requflpr_enable_user_approval', 0)) {
             return;
         }
 
@@ -78,7 +78,7 @@ class ApprovalUsers
             return $user;
         }
 
-        if (!get_option('approval_plugin_enable_user_approval', 0)) {
+        if (!get_option('requflpr_enable_user_approval', 0)) {
             return $user;
         }
 
@@ -106,6 +106,7 @@ class ApprovalUsers
      */
     public function login_message($message)
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         if (isset($_GET['approval']) && $_GET['approval'] === 'pending') {
             $message .= '<p class="message">' . esc_html__('Registration complete. Your account is pending approval.', 'request-flow-pro') . '</p>';
         }
@@ -117,9 +118,9 @@ class ApprovalUsers
      */
     public function registration_message($message)
     {
-        if (get_option('approval_plugin_enable_user_approval', 0)) {
+        if (get_option('requflpr_enable_user_approval', 0)) {
             $custom_message = get_option(
-                'approval_plugin_user_registration_message',
+                'requflpr_user_registration_message',
                 esc_html__('After you register, your account will need to be approved before you can login.', 'request-flow-pro')
             );
             $message .= '<p class="message">' . $custom_message . '</p>';
@@ -169,16 +170,19 @@ class ApprovalUsers
     {
         // Get pending count for badge
         $pending_count = $this->get_users_count(self::STATUS_PENDING);
-        $menu_title = $pending_count > 0
-            ? sprintf(__('User Approvals %s', 'request-flow-pro'), '<span class="awaiting-mod count-' . $pending_count . '"><span class="pending-count">' . number_format_i18n($pending_count) . '</span></span>')
-            : __('User Approvals', 'request-flow-pro');
+        if ($pending_count > 0) {
+            /* translators: %s: pending count badge */
+            $menu_title = sprintf(__('User Approvals %s', 'request-flow-pro'), '<span class="awaiting-mod count-' . $pending_count . '"><span class="pending-count">' . number_format_i18n($pending_count) . '</span></span>');
+        } else {
+            $menu_title = __('User Approvals', 'request-flow-pro');
+        }
 
         add_submenu_page(
-            'approval-requests',
+            'requflpr-requests',
             __('User Approvals', 'request-flow-pro'),
             $menu_title,
             'manage_options',
-            'approval-users',
+            'requflpr-users',
             array($this, 'users_page')
         );
     }
@@ -188,8 +192,8 @@ class ApprovalUsers
      */
     public function add_approval_column($columns)
     {
-        if (get_option('approval_plugin_enable_user_approval', 0)) {
-            $columns['approval_status'] = __('Approval Status', 'request-flow-pro');
+        if (get_option('requflpr_enable_user_approval', 0)) {
+            $columns['requflpr_status'] = __('Approval Status', 'request-flow-pro');
         }
         return $columns;
     }
@@ -199,7 +203,7 @@ class ApprovalUsers
      */
     public function approval_column_content($value, $column_name, $user_id)
     {
-        if ($column_name === 'approval_status') {
+        if ($column_name === 'requflpr_status') {
             $status = $this->get_user_status($user_id);
 
             $badge_class = 'status-' . $status;
@@ -216,11 +220,14 @@ class ApprovalUsers
     public function get_users_count($status)
     {
         $args = array(
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
             'meta_key' => self::META_KEY,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
             'meta_value' => $status,
             'count_total' => true,
             'fields' => 'ID'
         );
+
 
         $user_query = new WP_User_Query($args);
         return $user_query->get_total();
@@ -239,9 +246,12 @@ class ApprovalUsers
         );
 
         if ($status) {
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
             $args['meta_key'] = self::META_KEY;
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
             $args['meta_value'] = $status;
         }
+
 
         return new WP_User_Query($args);
     }
@@ -252,16 +262,18 @@ class ApprovalUsers
     private function send_admin_notification($user_id)
     {
         $user = get_userdata($user_id);
-        $admin_email = get_option('approval_plugin_admin_email', get_option('admin_email'));
+        $admin_email = get_option('requflpr_admin_email', get_option('admin_email'));
 
+        /* translators: %s: site name */
         $subject = sprintf(__('[%s] New User Registration Pending Approval', 'request-flow-pro'), get_bloginfo('name'));
 
+        /* translators: 1: username, 2: email, 3: registration date, 4: admin URL */
         $message = sprintf(
-            __("A new user has registered and is pending approval:\n\nUsername: %s\nEmail: %s\nRegistered: %s\n\nTo approve or deny this user, visit:\n%s", 'request-flow-pro'),
+            __("A new user has registered and is pending approval:\n\nUsername: %1\$s\nEmail: %2\$s\nRegistered: %3\$s\n\nTo approve or deny this user, visit:\n%4\$s", 'request-flow-pro'),
             $user->user_login,
             $user->user_email,
             date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($user->user_registered)),
-            admin_url('admin.php?page=approval-users')
+            admin_url('admin.php?page=requflpr-users')
         );
 
         wp_mail($admin_email, $subject, $message);
@@ -275,12 +287,12 @@ class ApprovalUsers
         $user = get_userdata($user_id);
 
         $subject = get_option(
-            'approval_plugin_user_pending_subject',
+            'requflpr_user_pending_subject',
             __('Your registration is pending approval', 'request-flow-pro')
         );
 
         $body = get_option(
-            'approval_plugin_user_pending_body',
+            'requflpr_user_pending_body',
             "Hello {user_name},\n\nThank you for registering at {site_name}.\n\nYour account is currently pending approval. You will receive another email once your account has been approved.\n\nThank you for your patience!"
         );
 
@@ -307,22 +319,22 @@ class ApprovalUsers
 
         if ($status === self::STATUS_APPROVED) {
             $subject = get_option(
-                'approval_plugin_user_approved_subject',
+                'requflpr_user_approved_subject',
                 __('Your account has been approved!', 'request-flow-pro')
             );
 
             $body = get_option(
-                'approval_plugin_user_approved_body',
+                'requflpr_user_approved_body',
                 "Hello {user_name},\n\nGreat news! Your account at {site_name} has been approved.\n\nYou can now login at: {site_url}/wp-login.php\n\nUsername: {username}\n\n{admin_notes}"
             );
         } else {
             $subject = get_option(
-                'approval_plugin_user_denied_subject',
+                'requflpr_user_denied_subject',
                 __('Your account registration', 'request-flow-pro')
             );
 
             $body = get_option(
-                'approval_plugin_user_denied_body',
+                'requflpr_user_denied_body',
                 "Hello {user_name},\n\nWe regret to inform you that your registration at {site_name} has been denied.\n\n{admin_notes}\n\nIf you have any questions, please contact us."
             );
         }
@@ -347,7 +359,7 @@ class ApprovalUsers
      */
     public function handle_user_action()
     {
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'approval_user_action')) {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'requflpr_user_action')) {
             wp_die(esc_html__('Security check failed.', 'request-flow-pro'));
         }
 
@@ -355,9 +367,9 @@ class ApprovalUsers
             wp_die(esc_html__('You do not have permission to perform this action.', 'request-flow-pro'));
         }
 
-        $user_id = intval($_POST['user_id']);
-        $action = sanitize_text_field($_POST['user_action']);
-        $admin_notes = isset($_POST['admin_notes']) ? sanitize_textarea_field($_POST['admin_notes']) : '';
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        $action = isset($_POST['user_action']) ? sanitize_text_field(wp_unslash($_POST['user_action'])) : '';
+        $admin_notes = isset($_POST['admin_notes']) ? sanitize_textarea_field(wp_unslash($_POST['admin_notes'])) : '';
 
         if ($action === 'approve') {
             $this->update_user_status($user_id, self::STATUS_APPROVED, $admin_notes);
@@ -365,7 +377,7 @@ class ApprovalUsers
             $this->update_user_status($user_id, self::STATUS_DENIED, $admin_notes);
         }
 
-        wp_redirect(add_query_arg('updated', '1', wp_get_referer()));
+        wp_safe_redirect(add_query_arg('updated', '1', wp_get_referer()));
         exit;
     }
 
@@ -374,7 +386,7 @@ class ApprovalUsers
      */
     public function handle_bulk_user_action()
     {
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'approval_bulk_user_action')) {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce'])), 'requflpr_bulk_user_action')) {
             wp_die(esc_html__('Security check failed.', 'request-flow-pro'));
         }
 
@@ -382,11 +394,11 @@ class ApprovalUsers
             wp_die(esc_html__('You do not have permission to perform this action.', 'request-flow-pro'));
         }
 
-        $action = sanitize_text_field($_POST['bulk_action']);
-        $user_ids = array_map('intval', $_POST['user_ids']);
+        $action = isset($_POST['bulk_action']) ? sanitize_text_field(wp_unslash($_POST['bulk_action'])) : '';
+        $user_ids = isset($_POST['user_ids']) ? array_map('intval', $_POST['user_ids']) : array();
 
         if (empty($user_ids) || $action === '-1') {
-            wp_redirect(wp_get_referer());
+            wp_safe_redirect(wp_get_referer());
             exit;
         }
 
@@ -403,7 +415,7 @@ class ApprovalUsers
             }
         }
 
-        wp_redirect(add_query_arg('bulk_updated', count($user_ids), wp_get_referer()));
+        wp_safe_redirect(add_query_arg('bulk_updated', count($user_ids), wp_get_referer()));
         exit;
     }
 
@@ -412,18 +424,19 @@ class ApprovalUsers
      */
     public function ajax_update_user_status()
     {
-        check_ajax_referer('approval_nonce', 'nonce');
+        check_ajax_referer('requflpr_nonce', 'nonce');
 
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => __('Permission denied.', 'request-flow-pro')));
         }
 
-        $user_id = intval($_POST['user_id']);
-        $status = sanitize_text_field($_POST['status']);
-        $admin_notes = isset($_POST['admin_notes']) ? sanitize_textarea_field($_POST['admin_notes']) : '';
+        $user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+        $status = isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : '';
+        $admin_notes = isset($_POST['admin_notes']) ? sanitize_textarea_field(wp_unslash($_POST['admin_notes'])) : '';
 
         if ($this->update_user_status($user_id, $status, $admin_notes)) {
             wp_send_json_success(array(
+                /* translators: %s: status (e.g. approved, denied) */
                 'message' => sprintf(__('User %s successfully!', 'request-flow-pro'), $status)
             ));
         } else {
@@ -436,7 +449,8 @@ class ApprovalUsers
      */
     public function users_page()
     {
-        $status_filter = isset($_GET['user_status']) ? sanitize_text_field($_GET['user_status']) : null;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+        $status_filter = isset($_GET['user_status']) ? sanitize_text_field(wp_unslash($_GET['user_status'])) : null;
 
         $user_query = $this->get_users_by_status($status_filter, 50, 0);
         $users = $user_query->get_results();
@@ -448,6 +462,6 @@ class ApprovalUsers
             'denied' => $this->get_users_count(self::STATUS_DENIED)
         );
 
-        require_once APPROVAL_PLUGIN_PATH . 'templates/admin-users.php';
+        require_once REQUFLPR_PATH . 'templates/admin-users.php';
     }
 }

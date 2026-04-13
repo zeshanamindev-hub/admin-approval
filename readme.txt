@@ -1,7 +1,7 @@
 === Request Flow Pro ===
 Contributors: zeshanamin
-Tags: approval, workflow, requests, admin, management, forms
-Requires at least: 6.0
+Tags: approval, workflow, requests, admin, management
+Requires at least: 5.0
 Tested up to: 6.9
 Requires PHP: 7.2
 Stable tag: 1.0.0
@@ -70,9 +70,10 @@ Two form styles available:
 * **Multi-Step Form** - Wizard with progress indicator
 
 Use shortcodes:
-* `[approval_form]` - Standard form
-* `[approval_form multistep="yes"]` - Multi-step form
-* `[approval_form title="Custom Title"]` - Custom title
+* `[requflpr_form]` - Standard form
+* `[requflpr_form multistep="yes"]` - Multi-step form
+* `[requflpr_form title="Custom Title"]` - Custom title
+* `[requflpr_form success_message="Thank you!"]` - Custom success message
 
 = 🔧 Advanced Features =
 
@@ -121,7 +122,7 @@ Use shortcodes:
    - General settings
 
 2. Add the form to any page using shortcode:
-   `[approval_form]`
+   `[requflpr_form]`
 
 3. Start managing requests from **Approvals → All Requests**
 
@@ -129,7 +130,7 @@ Use shortcodes:
 
 = How do I add the submission form to my site? =
 
-Add the shortcode `[approval_form]` to any page, post, or widget. For a multi-step form, use `[approval_form multistep="yes"]`.
+Add the shortcode `[requflpr_form]` to any page, post, or widget. For a multi-step form, use `[requflpr_form multistep="yes"]`.
 
 = Can I customize the email notifications? =
 
@@ -232,17 +233,17 @@ Developed with ❤️ for the WordPress community.
 The plugin provides several hooks for developers:
 
 **Actions:**
-* `approval_request_submitted` - Fires when a request is submitted
-* `approval_request_approved` - Fires when a request is approved
-* `approval_request_rejected` - Fires when a request is rejected
+* `requflpr_request_submitted` - Fires when a request is submitted
+* `requflpr_request_approved` - Fires when a request is approved
+* `requflpr_request_rejected` - Fires when a request is rejected
 
 **Filters:**
-* `approval_email_template` - Filter email templates
-* `approval_form_fields` - Filter form fields
-* `approval_allowed_categories` - Filter available categories
+* `requflpr_email_template` - Filter email templates
+* `requflpr_form_fields` - Filter form fields
+* `requflpr_allowed_categories` - Filter available categories
 
 = Database =
 
-The plugin creates one table: `wp_approval_requests`
+The plugin creates one table: `wp_requflpr_requests`
 
 Fields include: id, title, description, priority, category, submitter_name, submitter_email, status, admin_notes, created_at, updated_at

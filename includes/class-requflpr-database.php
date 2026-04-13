@@ -7,20 +7,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class ApprovalDatabase {
-    
-    private static $table_name = 'approval_requests';
-    
+class RequflprDatabase
+{
+
+    private static $table_name = 'requflpr_requests';
+
     /**
      * Create the approval requests table
      */
-    public static function create_table() {
+    public static function create_table()
+    {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . self::$table_name;
-        
+
         $charset_collate = $wpdb->get_charset_collate();
-        
+
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             title varchar(255) NOT NULL,
@@ -39,15 +41,16 @@ class ApprovalDatabase {
             KEY priority_idx (priority),
             KEY category_idx (category)
         ) $charset_collate;";
-        
+
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
     }
-    
+
     /**
      * Insert a new approval request
      */
-    public static function insert_request($data) {
+    public static function insert_request($data)
+    {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::$table_name;
@@ -62,6 +65,7 @@ class ApprovalDatabase {
             'category' => isset($data['category']) ? sanitize_text_field($data['category']) : 'general'
         );
 
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
         $result = $wpdb->insert(
             $table_name,
             $insert_data,
@@ -70,44 +74,50 @@ class ApprovalDatabase {
 
         return $result !== false ? $wpdb->insert_id : false;
     }
-    
+
     /**
      * Get all approval requests
      */
-    public static function get_requests($status = null, $limit = 20, $offset = 0) {
+    public static function get_requests($status = null, $limit = 20, $offset = 0)
+    {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . self::$table_name;
-        
+
         $where = '';
         if ($status) {
             $where = $wpdb->prepare(" WHERE status = %s", $status);
         }
-        
+
         $sql = "SELECT * FROM $table_name $where ORDER BY created_at DESC LIMIT %d OFFSET %d";
-        
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         return $wpdb->get_results($wpdb->prepare($sql, $limit, $offset));
     }
-    
+
     /**
      * Get a single request by ID
      */
-    public static function get_request($id) {
+    public static function get_request($id)
+    {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . self::$table_name;
-        
+
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE id = %d", $id));
     }
-    
+
     /**
      * Update request status
      */
-    public static function update_status($id, $status, $admin_notes = '') {
+    public static function update_status($id, $status, $admin_notes = '')
+    {
         global $wpdb;
-        
+
         $table_name = $wpdb->prefix . self::$table_name;
-        
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
         $result = $wpdb->update(
             $table_name,
             array(
@@ -118,21 +128,24 @@ class ApprovalDatabase {
             array('%s', '%s'),
             array('%d')
         );
-        
+
         return $result !== false;
     }
-    
+
     /**
      * Get request count by status
      */
-    public static function get_count($status = null) {
+    public static function get_count($status = null)
+    {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::$table_name;
 
         if ($status) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             return $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", $status));
         } else {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             return $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
         }
     }
@@ -140,17 +153,24 @@ class ApprovalDatabase {
     /**
      * Get statistics for dashboard
      */
-    public static function get_statistics() {
+    public static function get_statistics()
+    {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::$table_name;
 
         $stats = array(
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             'total' => $wpdb->get_var("SELECT COUNT(*) FROM $table_name"),
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             'pending' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'pending')),
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             'approved' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'approved')),
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             'rejected' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE status = %s", 'rejected')),
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             'today' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE DATE(created_at) = %s", current_time('Y-m-d'))),
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
             'this_week' => $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table_name WHERE YEARWEEK(created_at) = YEARWEEK(%s)", current_time('mysql'))),
         );
 
@@ -162,6 +182,7 @@ class ApprovalDatabase {
         }
 
         // Get average response time (in hours)
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         $avg_time = $wpdb->get_var("SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) FROM $table_name WHERE status != 'pending'");
         $stats['avg_response_time'] = $avg_time ? round($avg_time, 1) : 0;
 
@@ -171,29 +192,34 @@ class ApprovalDatabase {
     /**
      * Get requests by category
      */
-    public static function get_count_by_category() {
+    public static function get_count_by_category()
+    {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::$table_name;
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         return $wpdb->get_results("SELECT category, COUNT(*) as count FROM $table_name GROUP BY category");
     }
 
     /**
      * Get requests by priority
      */
-    public static function get_count_by_priority() {
+    public static function get_count_by_priority()
+    {
         global $wpdb;
 
         $table_name = $wpdb->prefix . self::$table_name;
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         return $wpdb->get_results("SELECT priority, COUNT(*) as count FROM $table_name GROUP BY priority");
     }
 
     /**
      * Bulk update status
      */
-    public static function bulk_update_status($ids, $status) {
+    public static function bulk_update_status($ids, $status)
+    {
         global $wpdb;
 
         if (empty($ids) || !is_array($ids)) {
@@ -204,10 +230,12 @@ class ApprovalDatabase {
         $ids_placeholder = implode(',', array_fill(0, count($ids), '%d'));
 
         $query = $wpdb->prepare(
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
             "UPDATE $table_name SET status = %s WHERE id IN ($ids_placeholder)",
             array_merge(array($status), $ids)
         );
 
+        // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
         return $wpdb->query($query);
     }
 }

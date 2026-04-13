@@ -44,12 +44,12 @@ jQuery(document).ready(function ($) {
 
         // AJAX request to get details
         $.ajax({
-            url: approval_ajax.ajax_url,
+            url: requflpr_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'approval_get_request_details',
+                action: 'requflpr_get_request_details',
                 request_id: requestId,
-                nonce: approval_ajax.nonce
+                nonce: requflpr_ajax.nonce
             },
             success: function (response) {
                 if (response.success) {
@@ -86,14 +86,14 @@ jQuery(document).ready(function ($) {
 
         // AJAX request
         $.ajax({
-            url: approval_ajax.ajax_url,
+            url: requflpr_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'approval_update_request',
+                action: 'requflpr_update_request',
                 request_id: requestId,
                 status: status,
                 admin_notes: '',
-                nonce: approval_ajax.nonce
+                nonce: requflpr_ajax.nonce
             },
             success: function (response) {
                 if (response.success) {
@@ -134,14 +134,14 @@ jQuery(document).ready(function ($) {
 
         // AJAX request
         $.ajax({
-            url: approval_ajax.ajax_url,
+            url: requflpr_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'approval_update_request',
+                action: 'requflpr_update_request',
                 request_id: requestId,
                 status: status,
                 admin_notes: adminNotes,
-                nonce: approval_ajax.nonce
+                nonce: requflpr_ajax.nonce
             },
             success: function (response) {
                 if (response.success) {
@@ -236,7 +236,7 @@ jQuery(document).ready(function ($) {
         showNotification(bulkUpdated + ' request(s) updated successfully!', 'success');
 
         // Remove parameter from URL
-        var newUrl = window.location.pathname + '?page=approval-requests';
+        var newUrl = window.location.pathname + '?page=requflpr-requests';
         var status = urlParams.get('status');
         if (status) {
             newUrl += '&status=' + status;
@@ -282,7 +282,7 @@ jQuery(document).ready(function ($) {
     // ========================================
     // Table row highlighting
     // ========================================
-    $('.approval-requests-table tbody tr').hover(
+    $('.requflpr-requests-table tbody tr').hover(
         function () {
             $(this).css('box-shadow', '0 2px 8px rgba(0,0,0,0.08)');
         },
@@ -357,7 +357,7 @@ jQuery(document).ready(function ($) {
     $('#approval-search-input, #user-search-input').on('keyup', function () {
         var searchTerm = $(this).val().toLowerCase();
 
-        $('.approval-requests-table tbody tr').each(function () {
+        $('.requflpr-requests-table tbody tr').each(function () {
             if ($(this).hasClass('no-search-results')) {
                 return;
             }
@@ -372,10 +372,10 @@ jQuery(document).ready(function ($) {
         });
 
         // Show "no results" message if all rows are hidden
-        var visibleRows = $('.approval-requests-table tbody tr:visible:not(.no-search-results)').length;
+        var visibleRows = $('.requflpr-requests-table tbody tr:visible:not(.no-search-results)').length;
         if (visibleRows === 0 && searchTerm !== '') {
             if ($('.no-search-results').length === 0) {
-                $('.approval-requests-table tbody').append(
+                $('.requflpr-requests-table tbody').append(
                     '<tr class="no-search-results"><td colspan="8" style="text-align: center; padding: 60px 20px; color: #9ca3af;"><div style="text-align: center;"><span class="dashicons dashicons-search" style="font-size: 64px; width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.5;"></span><br><strong style="font-size: 16px; display: block; margin-bottom: 8px;">No requests found</strong><span style="font-size: 14px;">Try adjusting your search terms</span></div></td></tr>'
                 );
             }
@@ -390,7 +390,7 @@ jQuery(document).ready(function ($) {
     // Settings Page Tabs
     // ========================================
     $('.nav-tab').on('click', function (e) {
-        if ($(this).attr('href').indexOf('#') === 0 && $(this).parents('.approval-settings-tabs').length > 0) {
+        if ($(this).attr('href').indexOf('#') === 0 && $(this).parents('.requflpr-settings-tabs').length > 0) {
             e.preventDefault();
             var target = $(this).attr('href');
             $('.nav-tab').removeClass('nav-tab-active');
@@ -410,7 +410,7 @@ jQuery(document).ready(function ($) {
         var isApprove = button.hasClass('user-quick-approve');
 
         // Use localized strings if available
-        var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+        var strings = (typeof requflpr_ajax !== 'undefined' && requflpr_ajax.strings) ? requflpr_ajax.strings : {};
 
         var action = isApprove ? (strings.approve || 'approve') : (strings.deny || 'deny');
         var confirmMsg = (strings.confirm_single || 'Are you sure you want to') + ' ' + action + ' ' + (strings.this_user || 'this user?');
@@ -423,14 +423,14 @@ jQuery(document).ready(function ($) {
         button.prop('disabled', true).text(loadingText);
 
         $.ajax({
-            url: approval_ajax.ajax_url,
+            url: requflpr_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'approval_update_user_status',
+                action: 'requflpr_update_user_status',
                 user_id: userId,
                 status: isApprove ? 'approved' : 'denied',
                 admin_notes: '',
-                nonce: approval_ajax.nonce
+                nonce: requflpr_ajax.nonce
             },
             success: function (response) {
                 if (response.success) {
@@ -448,12 +448,12 @@ jQuery(document).ready(function ($) {
     });
 
     // Bulk Actions for Users
-    $('#approval-users-form').on('submit', function (e) {
+    $('#requflpr-users-form').on('submit', function (e) {
         var action = $('#bulk-action-selector-users').val();
 
         if (action === 'approve' || action === 'deny') {
             var checked = $('input[name="user_ids[]"]:checked').length;
-            var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+            var strings = (typeof requflpr_ajax !== 'undefined' && requflpr_ajax.strings) ? requflpr_ajax.strings : {};
 
             if (checked === 0) {
                 e.preventDefault();
@@ -469,7 +469,7 @@ jQuery(document).ready(function ($) {
             }
         } else if (action === '-1') {
             // Let WP handle or just alert
-            var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+            var strings = (typeof requflpr_ajax !== 'undefined' && requflpr_ajax.strings) ? requflpr_ajax.strings : {};
             e.preventDefault();
             alert(strings.select_action || 'Please select an action.');
         }

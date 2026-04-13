@@ -19,57 +19,92 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('APPROVAL_PLUGIN_VERSION', '1.0.0');
-define('APPROVAL_PLUGIN_PATH', plugin_dir_path(__FILE__));
-define('APPROVAL_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('REQUFLPR_VERSION', '1.0.0');
+define('REQUFLPR_PATH', plugin_dir_path(__FILE__));
+define('REQUFLPR_URL', plugin_dir_url(__FILE__));
 
 /**
- * Main Approval Plugin Class
+ * Main Request Flow Pro Plugin Class
  */
-class ApprovalPlugin {
-    
-    public function __construct() {
+class RequflprPlugin
+{
+
+    public function __construct()
+    {
+        // Load dependencies early to avoid class availability issues on init.
+        $this->load_dependencies();
+
         add_action('init', array($this, 'init'));
         register_activation_hook(__FILE__, array($this, 'activate'));
         register_deactivation_hook(__FILE__, array($this, 'deactivate'));
     }
-    
-    public function init() {
-        // Load plugin files
+
+    public function init()
+    {
+        // Ensure classes are available before instantiation.
         $this->load_dependencies();
-        
+
         // Initialize components
-        if (is_admin()) {
-            new ApprovalAdmin();
+        if (is_admin() && class_exists('RequflprAdmin')) {
+            new RequflprAdmin();
         }
-        new ApprovalShortcodes();
-        new ApprovalUsers();
+        if (class_exists('RequflprShortcodes')) {
+            new RequflprShortcodes();
+        }
+        if (class_exists('RequflprUsers')) {
+            new RequflprUsers();
+        }
     }
-    
-    private function load_dependencies() {
-        require_once APPROVAL_PLUGIN_PATH . 'includes/class-approval-database.php';
-        require_once APPROVAL_PLUGIN_PATH . 'includes/class-approval-admin.php';
-        require_once APPROVAL_PLUGIN_PATH . 'includes/class-approval-shortcodes.php';
-        require_once APPROVAL_PLUGIN_PATH . 'includes/class-approval-users.php';
+
+    private function load_dependencies()
+    {
+        $dependency_files = array(
+            REQUFLPR_PATH . 'includes/class-requflpr-database.php',
+            REQUFLPR_PATH . 'includes/class-requflpr-admin.php',
+            REQUFLPR_PATH . 'includes/class-requflpr-shortcodes.php',
+            REQUFLPR_PATH . 'includes/class-requflpr-users.php',
+        );
+
+        foreach ($dependency_files as $dependency_file) {
+            if (file_exists($dependency_file)) {
+                require_once $dependency_file;
+            }
+        }
+
+        // Backward compatibility for mixed class names during upgrade transitions.
+        if (!class_exists('RequflprAdmin') && class_exists('ApprovalAdmin')) {
+            class_alias('ApprovalAdmin', 'RequflprAdmin');
+        }
+        if (!class_exists('RequflprUsers') && class_exists('ApprovalUsers')) {
+            class_alias('ApprovalUsers', 'RequflprUsers');
+        }
+        if (!class_exists('RequflprDatabase') && class_exists('ApprovalDatabase')) {
+            class_alias('ApprovalDatabase', 'RequflprDatabase');
+        }
+        if (!class_exists('RequflprShortcodes') && class_exists('ApprovalShortcodes')) {
+            class_alias('ApprovalShortcodes', 'RequflprShortcodes');
+        }
     }
-    
-    public function activate() {
+
+    public function activate()
+    {
         // Load dependencies for activation
-        require_once APPROVAL_PLUGIN_PATH . 'includes/class-approval-database.php';
+        require_once REQUFLPR_PATH . 'includes/class-requflpr-database.php';
 
         // Create database table
-        ApprovalDatabase::create_table();
+        RequflprDatabase::create_table();
 
         // Set default options
-        add_option('approval_plugin_version', APPROVAL_PLUGIN_VERSION);
-        add_option('approval_plugin_email_notifications', 1);
+        add_option('requflpr_version', REQUFLPR_VERSION);
+        add_option('requflpr_email_notifications', 1);
     }
-    
-    public function deactivate() {
+
+    public function deactivate()
+    {
         // Clean up scheduled events if any
-        wp_clear_scheduled_hook('approval_plugin_cleanup');
+        wp_clear_scheduled_hook('requflpr_cleanup');
     }
 }
 
 // Initialize the plugin
-new ApprovalPlugin();
+new RequflprPlugin();

@@ -72,7 +72,7 @@ jQuery(document).ready(function ($) {
         });
 
         if (!isValid) {
-            var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+            var strings = (typeof requflpr_ajax !== 'undefined' && requflpr_ajax.strings) ? requflpr_ajax.strings : {};
             showMessage(strings.fill_required || 'Please fill in all required fields.', 'error');
         }
 
@@ -97,7 +97,7 @@ jQuery(document).ready(function ($) {
         var $form = $(this);
         var $submitBtn = $form.find('.btn-submit');
         var $messages = $('#approval-form-messages');
-        var strings = (typeof approval_ajax !== 'undefined' && approval_ajax.strings) ? approval_ajax.strings : {};
+        var strings = (typeof requflpr_ajax !== 'undefined' && requflpr_ajax.strings) ? requflpr_ajax.strings : {};
 
         // Disable submit button
         var originalText = $submitBtn.html();
@@ -108,11 +108,11 @@ jQuery(document).ready(function ($) {
         $messages.empty();
 
         $.ajax({
-            url: approval_ajax.ajax_url,
+            url: requflpr_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'submit_approval_request',
-                nonce: approval_ajax.nonce,
+                action: 'requflpr_submit_approval_request',
+                nonce: requflpr_ajax.nonce,
                 title: $form.find('[name="title"]').val(),
                 description: $form.find('[name="description"]').val(),
                 submitter_name: $form.find('[name="submitter_name"]').val(),
